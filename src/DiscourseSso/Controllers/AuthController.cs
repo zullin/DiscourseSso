@@ -43,10 +43,8 @@ namespace DiscourseSso.Controllers
                     SlidingExpiration = new TimeSpan(12, 0, 0) // nonce lasts only 12 hours
                 });
 
-            string returnUrl = $"http://{Request.Host.Value}/api/Auth/GetToken";
-
             // create payload, base64 encode & url encode
-            string payload = $"nonce={nonce}&return_sso_url={returnUrl}";
+            string payload = $"nonce={nonce}&return_sso_url={Request.Headers["Referer"]}";
 
             string base64Payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload));
             string urlEncodedPayload = Uri.EscapeUriString(base64Payload);
@@ -100,8 +98,11 @@ namespace DiscourseSso.Controllers
 
             // creating JWT with info from sso as claims
             string jwt = _helpers.CreateJwt(userInfo["external_id"], userInfo);
-
-            return Ok(jwt);
+            
+            return Json(new {
+                token = jwt,
+                username = userInfo["username"]
+            });
         }
     }
 }

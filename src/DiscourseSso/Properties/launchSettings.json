@@ -18,10 +18,11 @@
     },
     "DiscourseSso": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "http://localhost:5000/api/auth/login",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://*:5000"
       },
       "applicationUrl": "http://localhost:5000/"
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,12 +29,18 @@ namespace DiscourseSso
 
             // framework services
             services.AddMvc();
+            services.AddCors();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
-            loggerFactory.AddDebug();
+            if ( env.IsDevelopment() )
+            {
+                loggerFactory.AddConsole();
+                loggerFactory.AddDebug();
+
+                app.UseCors( builder => builder.WithOrigins(Configuration["FrontendUrl"]).AllowAnyHeader().AllowAnyMethod().AllowCredentials() );
+            }
 
             app.UseMvc();
         }
