@@ -51,14 +51,14 @@ namespace DiscourseSso.Controllers
 
             // generating HMAC-SHA256 from base64-encoded payload using sso secret as signiture
             string hexSigniture;
-            using (HMACSHA256 hmac = new HMACSHA256(Encoding.ASCII.GetBytes(_config["DiscourseSso:SsoSecret"])))
+            using (HMACSHA256 hmac = new HMACSHA256(Encoding.ASCII.GetBytes(_config["DiscourseSsoSecret"])))
             {
                 byte[] sha256 = hmac.ComputeHash(Encoding.ASCII.GetBytes(base64Payload));
                 hexSigniture = BitConverter.ToString(sha256).Replace("-", "").ToLower();
             }
 
             // send auth request to Discourse
-            string redirectTo = $"{_config["DiscourseSso:DiscourseRootUrl"]}/session/sso_provider?sso={urlEncodedPayload}&sig={hexSigniture}";
+            string redirectTo = $"{_config["DiscourseUrl"]}/session/sso_provider?sso={urlEncodedPayload}&sig={hexSigniture}";
             return Redirect(redirectTo);
         }
 
@@ -66,7 +66,7 @@ namespace DiscourseSso.Controllers
         {
             // generate HMAC-SHA256 from sso using sso secret as key
             byte[] ssoSha256;
-            using (HMACSHA256 hmac = new HMACSHA256(Encoding.ASCII.GetBytes(_config["DiscourseSso:SsoSecret"])))
+            using (HMACSHA256 hmac = new HMACSHA256(Encoding.ASCII.GetBytes(_config["DiscourseSsoSecret"])))
                 ssoSha256 = hmac.ComputeHash(Encoding.ASCII.GetBytes(sso));
 
             // convert sig from HEX to bytes
