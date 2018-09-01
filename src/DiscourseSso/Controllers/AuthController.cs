@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Extensions.Logging;
-using Jose;
 using DiscourseSso.Services;
 
 namespace DiscourseSso.Controllers
@@ -22,8 +22,8 @@ namespace DiscourseSso.Controllers
         private Helpers _helpers;
 
         public AuthController(
-            IDistributedCache cache, 
-            IConfigurationRoot config, 
+            IDistributedCache cache,
+            IConfigurationRoot config,
             ILogger<AuthController> logger,
             Helpers helpers)
         {
@@ -37,7 +37,7 @@ namespace DiscourseSso.Controllers
         {
             // generate & store nonce in cache
             string nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("+", "");
-            await _cache.SetStringAsync(nonce, "_", 
+            await _cache.SetStringAsync(nonce, "_",
                 new DistributedCacheEntryOptions()
                 {
                     SlidingExpiration = new TimeSpan(12, 0, 0) // nonce lasts only 12 hours
@@ -60,7 +60,6 @@ namespace DiscourseSso.Controllers
             // send auth request to Discourse
             string redirectTo = $"{_config["DiscourseSso:DiscourseRootUrl"]}/session/sso_provider?sso={urlEncodedPayload}&sig={hexSigniture}";
             return Redirect(redirectTo);
-
         }
 
         public async Task<IActionResult> GetToken(string sig, string sso)
@@ -92,17 +91,21 @@ namespace DiscourseSso.Controllers
             else
                 await _cache.RemoveAsync(userInfo["nonce"]);
 
-            // don't include these in JWT
-            userInfo.Remove("nonce");
-            userInfo.Remove("return_sso_url");
+            var formData = new MultipartFormDataContent();
+            formData.Add(new StringContent(_config["DiscourseApiKey"]), "api_key");
+            formData.Add(new StringContent(userInfo["username"]), "api_username");
 
-            // creating JWT with info from sso as claims
-            string jwt = _helpers.CreateJwt(userInfo["external_id"], userInfo);
-            
-            return Json(new {
-                token = jwt,
-                username = userInfo["username"]
-            });
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.PostAsync(
+                    $"{_config["DiscourseUrl"]}/admin/users/{userInfo["external_id"]}/generate_api_key",
+                    formData
+                ))
+                {
+                    var contents = await response.Content.ReadAsStringAsync();
+                    return Ok(contents);
+                }
+            }
         }
     }
 }

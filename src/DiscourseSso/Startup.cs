@@ -16,6 +16,12 @@ namespace DiscourseSso
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+
+            if (env.IsDevelopment())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
             Configuration = builder.Build();
         }
 
@@ -34,14 +40,13 @@ namespace DiscourseSso
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            if ( env.IsDevelopment() )
+            if (env.IsDevelopment())
             {
                 loggerFactory.AddConsole();
                 loggerFactory.AddDebug();
-
-                app.UseCors( builder => builder.WithOrigins(Configuration["FrontendUrl"]).AllowAnyHeader().AllowAnyMethod().AllowCredentials() );
             }
 
+            app.UseCors(builder => builder.WithOrigins(Configuration["FrontendUrl"]).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             app.UseMvc();
         }
     }

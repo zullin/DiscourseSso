@@ -6,13 +6,13 @@
     <AssemblyName>DiscourseSso</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>DiscourseSso</PackageId>
+    <UserSecretsId>1c4cc814-3da7-442d-96ce-4f0a2b8867f7</UserSecretsId>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.6;portable-net45+win8</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0" />
-    <PackageReference Include="jose-jwt" Version="2.4.0" />
   </ItemGroup>
 
 </Project>
