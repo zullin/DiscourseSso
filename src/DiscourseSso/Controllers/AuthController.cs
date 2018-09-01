@@ -62,7 +62,7 @@ namespace DiscourseSso.Controllers
             return Redirect(redirectTo);
         }
 
-        public async Task<IActionResult> GetToken(string sig, string sso)
+        public async Task<IActionResult> GetApiKey(string sig, string sso)
         {
             // generate HMAC-SHA256 from sso using sso secret as key
             byte[] ssoSha256;
